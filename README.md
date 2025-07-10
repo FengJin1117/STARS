@@ -79,12 +79,13 @@ Example metadata.json entry json:
 ]
 ```
 
-### Run Inference
+Run Inference
 
 ```shell
 CUDA_VISIBLE_DEVICES=[your-gpus] python inference/stars.py -o [output-dir] --metadata [metadata.json]
 ```
-### Optional Flags
+
+Optional Flags
 - `--save_plot`: Save visualizations for alignment and prediction results.
 - `-v`: Enable verbose logging for detailed output.
 - `--bsz`: Set the batch size per GPU (default is usually safe, adjust if out-of-memory).
