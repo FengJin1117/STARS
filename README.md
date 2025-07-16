@@ -43,7 +43,8 @@ Download the pretrained models from [HuggingFace](https://huggingface.co/verstar
 
 | Model             | Description               | Path                          |
 |------------------|---------------------------|-------------------------------|
-| STARS (Chinese)  | Singing annotation model  | `checkpoints/stars_chinese`  |
+| STARS (Chinese)  | Chinese Singing annotation model  | `checkpoints/stars_chinese`  |
+| STARS (chinese_english)  | Chinese an English Singing annotation model  | `checkpoints/stars_bilingual`  |
 | RMVPE             | Pitch extraction model    | `checkpoints/rmvpe`          |
 
 
@@ -82,8 +83,9 @@ Example metadata.json entry json:
 Run Inference
 
 ```shell
-CUDA_VISIBLE_DEVICES=[your-gpus] python inference/stars.py -o [output-dir] --metadata [metadata.json]
+CUDA_VISIBLE_DEVICES=[your-gpus] python inference/stars.py --ckpt [path-to-ckpt] --config [config-file] --phset [path-to-phset] -o [output-dir] --metadata [metadata.json]
 ```
+Please note that the `--config` and `--phset` should correspond to the `--ckpt`. For instance, in the case of the bilingual model, the config needs to be set to `configs/stars_bilingual.yaml`, and the phset to `chinese_and_english_phone_set.json`.
 
 Optional Flags
 - `--save_plot`: Save visualizations for alignment and prediction results.
@@ -91,6 +93,7 @@ Optional Flags
 - `--bsz`: Set the batch size per GPU (default is usually safe, adjust if out-of-memory).
 - `--max_tokens`: Limit the number of tokens per batch to control memory usage.
 - `--ds_workers`: Number of CPU worker processes for data preprocessing (helps speed up loading).
+
 
 ## Training
 

@@ -586,12 +586,18 @@ class AlignInfer:
         note_itv_pred = boundary2Interval(note_bd_pred)
         pred_fn = f'{self.work_dir}/midi/{fn}.mid'
         if self.hparams.get('infer_regulate_real_note_itv', True):
-            word_durs = np.array(bd_to_durs(word_bd)) * self.hparams['hop_size'] / self.hparams['audio_sample_rate']
-            note_itv_pred_secs, note2words = regulate_real_note_itv(note_itv_pred, note_bd_pred, word_bd, word_durs, self.hparams['hop_size'], self.hparams['audio_sample_rate'])
-            regulate_note_pred, note_itv_pred_secs, note2words = regulate_ill_slur(note_pred, note_itv_pred_secs, note2words)
-            save_midi(regulate_note_pred, note_itv_pred_secs, safe_path(pred_fn))
-            if self.args.check_slur:
-                check_slur_cnt(note2words, item_name, verbose=self.args.verbose)
+            try:
+                word_durs = np.array(bd_to_durs(word_bd)) * self.hparams['hop_size'] / self.hparams['audio_sample_rate']
+                note_itv_pred_secs, note2words = regulate_real_note_itv(note_itv_pred, note_bd_pred, word_bd, word_durs, self.hparams['hop_size'], self.hparams['audio_sample_rate'])
+                regulate_note_pred, note_itv_pred_secs, note2words = regulate_ill_slur(note_pred, note_itv_pred_secs, note2words)
+                save_midi(regulate_note_pred, note_itv_pred_secs, safe_path(pred_fn))
+                if self.args.check_slur:
+                    check_slur_cnt(note2words, item_name, verbose=self.args.verbose)
+            except AssertionError as e:
+                print(e)
+                note_itv_pred_secs = note_itv_pred * self.hparams['hop_size'] / self.hparams['audio_sample_rate']
+                save_midi(note_pred, note_itv_pred_secs, safe_path(pred_fn))
+                note2words = None
         else:
             note_itv_pred_secs = note_itv_pred * self.hparams['hop_size'] / self.hparams['audio_sample_rate']
             save_midi(note_pred, note_itv_pred_secs, safe_path(pred_fn))

@@ -102,7 +102,7 @@ scheduler_lr_step_size: 500
 warmup_updates: 0
 
 max_epochs: 100
-max_updates: 220000
+max_updates: 300000
 max_tokens: 100000
 max_sentences: 16
 val_check_interval: 10000
@@ -132,8 +132,6 @@ note_attn_num_head: 4
 max_note_num: 4
 note_num_pre: true
 
-conformer_layers: 2
-
 tech_pre: true
 lan_pre: true
 gen_pre: true
@@ -149,6 +147,7 @@ nVQ: 48
 crop: false
 predictor_grad: 1.0
 
+conformer_layers: 4
 ph_start: 0
 note_bd_start: 50000
 vq_ph_start: 60000
@@ -157,3 +156,5 @@ note_pitch_start: 70000
 vq_note_start: 80000
 tech_start: 90000
 att_start: 110000
+
+
