@@ -143,13 +143,18 @@ This implementation uses parts of the code from the following GitHub repos:
 [LyricAlignment](https://github.com/navi0105/LyricAlignment),
 [SOFA](https://github.com/qiuqiao/SOFA).
 
-<!-- ## Citation
+## Citation
 
 If you find this code useful in your research, please cite our work:
 
 ```bibtex
-@misc{}
-``` -->
+@article{guo2025stars,
+  title={STARS: A Unified Framework for Singing Transcription, Alignment, and Refined Style Annotation},
+  author={Guo, Wenxiang and Zhang, Yu and Pan, Changhao and Zhu, Zhiyuan and Li, Ruiqi and Chen, Zhetao and Xu, Wenhao and Wu, Fei and Zhao, Zhou},
+  journal={arXiv preprint arXiv:2507.06670},
+  year={2025}
+}
+```
 
 ## Disclaimer ##
 Any organization or individual is prohibited from using any technology mentioned in this paper to generate someone's speech/singing without his/her consent, including but not limited to government leaders, political figures, and celebrities. If you do not comply with this item, you could be in violation of copyright laws.
