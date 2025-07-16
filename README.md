@@ -50,7 +50,7 @@ Download the pretrained models from [HuggingFace](https://huggingface.co/verstar
 
 ## Inference
 
-First, prepare the metadata in a standardized `metadata.json` format. Each entry should be a dictionary with the following fields:
+First, prepare the metadata in a standardized `metadata.json` format. Note that using pure vocal audio will yield better results. You can use Ultimate Vocal Remover or other tools for vocal-instrument separation. Each entry should be a dictionary with the following fields:
 
 - `item_name`: Unique ID of the audio segment  
 - `wav_fn`: Path to the waveform  
