@@ -80,6 +80,11 @@ Example metadata.json entry json:
 ]
 ```
 
+You can also get the phonemes of mixed Chinese and English text using the following command:
+```bash
+python scripts/mixedtext2phoneme.py --text "welcome to 北京" --with_phsep
+```
+
 Run Inference
 
 ```shell
