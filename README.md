@@ -1,3 +1,8 @@
+# 我的
+程序入口：infer.sh
+
+
+-- 原版介绍 --
 # STARS: A Unified Framework for Singing Transcription, Alignment, and Refined Style Annotation
 
 This is the official PyTorch implementation of **[STARS]**, a unified framework for singing voice **transcription**, **alignment**, and **refined style annotation**. It includes the full implementation and pretrained model checkpoints.  
