@@ -25,6 +25,8 @@ def get_syllable_durations(ph_list, ph_durs, ph2words):
         raise ValueError(
             f"ph_list and ph_durs must have the same length, "
             f"got {len(ph_list)} vs {len(ph_durs)}"
+            f"ph_list: {ph_list}", 
+            f"ph_durs: {ph_durs}"
         )
 
     # === 1. 统计每个 word_id 的总 phoneme 时长 ===
@@ -226,7 +228,7 @@ def convert_item_to_opencpop(data):
         notes_str = " ".join([str(int(x)) for x in note_list])
         syb_str = " ".join([f"{x:.3f}" for x in syb_durs])
         phd_str = " ".join([f"{x:.3f}" for x in ph_durs])
-        slur_str = ["0"] * len(ph_list)
+        slur_str = " ".join(["0"] * len(ph_list))
         line = f"{item_name}|{lyrics}|{phs_str}|{notes_str}|{syb_str}|{phd_str}|{slur_str}"
     return line
 
@@ -234,7 +236,7 @@ def gtsinger_to_opencpop(gtsinger_path):
     '''
         这里负责遍历数据，读入保存。不负责具体转换功能
     '''
-    if os.path.exists(gtsinger_path):
+    if not os.path.exists(gtsinger_path):
         raise FileNotFoundError(
             f"文件不存在：{gtsinger_path}"
         )
@@ -242,11 +244,11 @@ def gtsinger_to_opencpop(gtsinger_path):
 
     opencpop_lines = []
     for item in data:
-        score_line = convert_item_to_gtsinger(item)
+        score_line = convert_item_to_opencpop(item)
         opencpop_lines.append(score_line)
     
     # 输出opencpop乐谱
-    opencpop_path = gtsinger_path.replace("output.json", "opencpop.txt")
+    opencpop_path = os.path.join(os.path.dirname(gtsinger_path), "opencpop_raw.txt")
     with open(opencpop_path, "w", encoding="utf-8") as f:
         for l in opencpop_lines:
             f.write(l + "\n")
@@ -264,7 +266,7 @@ def stars_to_gtsinger(json_path):
     assert isinstance(data, list), "output.json 应为 list[dict]"
 
     # 2. 读取 metadata.json（后续用 ph2words / 原始信息）
-    metadata_path = json_path.replace("output.json", "metadata.json")
+    metadata_path = os.path.join(os.path.dirname(json_path), "metadata.json")
     metadata = read_json(metadata_path)
 
     # 建立 item_name -> ph2words 映射
@@ -277,7 +279,7 @@ def stars_to_gtsinger(json_path):
         gtsinger_scores.append(score_dict)
 
     # 4. 保存输出gtsinger形式乐谱
-    gtsinger_path = json_path.replace("output.json", "gtsinger.json")
+    gtsinger_path = os.path.join(os.path.dirname(json_path), "gtsinger.json")
     write_json(gtsinger_scores, gtsinger_path)
     print(f"GTSinger 格式乐谱输出到: {gtsinger_path}")
 
@@ -295,7 +297,7 @@ def command():
     json_path = sys.argv[1]
     stars_to_gtsinger(json_path)
 
-
-
 if __name__ == "__main__":
-    test()
+    # test()
+
+    command()

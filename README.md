@@ -2,6 +2,20 @@
 程序入口：infer.sh
 
 
+## 脚本
+gtsinger.py: 
+- 根据STARS的output.json，输出gtsinger形式的乐谱 (json格式)。
+- 这里不考虑转音，简单按时间加权处理。
+get_score.py: 根据STARS的output.json，得到opencpop（有syb_dur的bug，得到的推理片段偏短）。
+
+## Bug:
+如果不写no_save_textgrid，就会丢失<SP>。
+stars.py中
+```
+# save TextGrid (optional)
+if not self.args.no_save_textgrid and ph_bd==None:
+```
+
 -- 原版介绍 --
 # STARS: A Unified Framework for Singing Transcription, Alignment, and Refined Style Annotation
 

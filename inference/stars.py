@@ -464,7 +464,29 @@ class AlignInfer:
                 mel_nonpadding = batch['mel_nonpadding']
                 ph2words = batch['ph2words']
                 output = model(mel=mel_input, pitch=pitch_coarse, uv=uv, mel_nonpadding=mel_nonpadding, mel2ph=mel2ph, mel2word=mel2word, ph_bd=ph_bd, word_bd=word_bd, ph=ph, ph_lengths=ph_lengths, mel_lengths=mel_lengths, ph2words=ph2words, train=False, global_steps=self.global_steps)
-                                
+                # try:
+                #     output = model(
+                #         mel=mel_input, pitch=pitch_coarse, uv=uv,
+                #         mel_nonpadding=mel_nonpadding, mel2ph=mel2ph,
+                #         mel2word=mel2word, ph_bd=ph_bd, word_bd=word_bd,
+                #         ph=ph, ph_lengths=ph_lengths, mel_lengths=mel_lengths,
+                #         ph2words=ph2words, train=False, global_steps=self.global_steps
+                #     )
+                # except Exception as e:
+                #     log_file = os.path.join(self.work_dir, "error_log.txt")
+                #     with open(log_file, "a", encoding="utf-8") as f:
+                #         f.write("❌ Error occurred when processing batch:\n")
+                #         for idx, it in enumerate(batch["item_names"]):
+                #             f.write(f"  [{idx}] item_name: {it}\n")
+                #             f.write(f"      wav_fn: {batch['wav_fns'][idx] if 'wav_fns' in batch else 'unknown'}\n")
+                #             f.write(f"      text: {batch['texts'][idx] if 'texts' in batch else 'unknown'}\n")
+                #         f.write(f"mel_input shape: {None if mel_input is None else tuple(mel_input.shape)}\n")
+                #         f.write(f"ph_lengths: {ph_lengths.tolist() if ph_lengths is not None else 'None'}\n")
+                #         f.write(f"mel_lengths: {mel_lengths.tolist() if mel_lengths is not None else 'None'}\n")
+                #         f.write(f"Error details: {repr(e)}\n")
+                #         f.write("="*80 + "\n")
+                #     raise
+
                 # global style
                 technique_pred = torch.argmax(output['technique_logits'], dim=-1)
                 language_pred = torch.argmax(output['language_logits'], dim=-1)
@@ -482,7 +504,8 @@ class AlignInfer:
                     dp_matrix = output['dp_matrix_list'][idx]
                     word_list = batch['words'][idx]
                     ph_list = batch['ph_list'][idx]
-                    
+                    # ph2words_list = batch['ph2words'][idx].cpu().tolist()[:mel_lengths[idx]]
+
                     tech_logits = output['tech_logits'][idx]
                     tech_pred = torch.sigmoid(tech_logits)  # [B, ph_length, tech_num]
                     tech_pred = (tech_pred > self.tech_threshold).long().cpu()
@@ -500,8 +523,9 @@ class AlignInfer:
                             dp_matrix=dp_matrix, 
                             tg_fn=os.path.join(self.work_dir, 'textgrid', f'{item_name}.TextGrid')
                         )
-                        word_list = ['<SP>' if word[2] == -1 else word_list[word[2]] for word in word_of]
-                        ph_list = [self.ph_encoder.id_to_token[phone[2]] for phone in ph_of]
+                    # 这里不管保不保存TextGrid，都要写入<SP>
+                    word_list = ['<SP>' if word[2] == -1 else word_list[word[2]] for word in word_of]
+                    ph_list = [self.ph_encoder.id_to_token[phone[2]] for phone in ph_of]
 
                     # process note boundary
                     note_bd_pred = output['note_bd_pred'][idx][:mel_lengths[idx]]
@@ -520,20 +544,28 @@ class AlignInfer:
                     
                     # result
                     result = {
+                        # 核心信息
                         'item_name': item_name,
                         'wav_fn': batch['wav_fn'][idx],
-                        'ph_list': ph_list,
                         'word_list': word_list,
+                        'ph_list': ph_list,
+                        # "ph2words": ph2words_list,
                         'note_list': note_pred.tolist(),
+                        # 时长
+                        'word_durs': [],
+                        'ph_durs': [],
+                        'note_durs': [],
+                        # 技巧标注
                         'bubble_tech': [],
                         'breathe_tech': [],
                         'pharyngeal_tech': [],
                         'vibrato_tech': [],
                         'glissando_tech': [],
-                        'mix_tech': [],
+                        'mixed_tech': [],
                         'falsetto_tech': [],
                         'weak_tech': [],
                         'strong_tech': [],
+                        # 风格标注
                         'style': {
                             'language': self.label2lan.get(language_pred[idx].item(), 'unknown'),
                             'gender': self.label2gen.get(gender_pred[idx].item(), 'unknown'),
@@ -658,7 +690,8 @@ class AlignInferDataset(Dataset):
         
         self.num_workers = num_workers
         self.items = items
-        self.ph_encoder = PhoneEncoder(os.path.join(hparams["processed_data_dir"], "phone_set.json"))
+        # self.ph_encoder = PhoneEncoder(os.path.join(hparams["processed_data_dir"], "phone_set.json"))
+        self.ph_encoder = PhoneEncoder("chinese_phone_set.json")
         self.mel_net = MelNet(self.hparams)
 
     def __getitem__(self, idx):
