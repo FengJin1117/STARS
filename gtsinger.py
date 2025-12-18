@@ -1,5 +1,6 @@
 import os
 import json
+import sys
 
 def read_json(json_path):
     with open(json_path, "r", encoding="utf-8") as f:
@@ -206,6 +207,51 @@ def convert_item_to_gtsinger(item, ph2words_map):
     return score
 
 
+def convert_item_to_opencpop(data):
+    '''
+        return: 返回一个字符串
+    '''
+    for item in data:
+        # 读入数据
+        item_name = data["item_name"]
+        word_list = data["word_list"]
+        ph_list = data["ph_list"]
+        note_list = data["note_list"]
+        syb_durs = data["syb_durs"]
+        ph_durs = data["ph_durs"]
+
+        # format lists to strings
+        lyrics = "".join([str(x) for x in word_list if x != "<SP>"])
+        phs_str = " ".join([str(x) for x in ph_list])
+        notes_str = " ".join([str(int(x)) for x in note_list])
+        syb_str = " ".join([f"{x:.3f}" for x in syb_durs])
+        phd_str = " ".join([f"{x:.3f}" for x in ph_durs])
+        slur_str = ["0"] * len(ph_list)
+        line = f"{item_name}|{lyrics}|{phs_str}|{notes_str}|{syb_str}|{phd_str}|{slur_str}"
+    return line
+
+def gtsinger_to_opencpop(gtsinger_path):
+    '''
+        这里负责遍历数据，读入保存。不负责具体转换功能
+    '''
+    if os.path.exists(gtsinger_path):
+        raise FileNotFoundError(
+            f"文件不存在：{gtsinger_path}"
+        )
+    data = read_json(gtsinger_path)
+
+    opencpop_lines = []
+    for item in data:
+        score_line = convert_item_to_gtsinger(item)
+        opencpop_lines.append(score_line)
+    
+    # 输出opencpop乐谱
+    opencpop_path = gtsinger_path.replace("output.json", "opencpop.txt")
+    with open(opencpop_path, "w", encoding="utf-8") as f:
+        for l in opencpop_lines:
+            f.write(l + "\n")
+    print(f"保存 {len(opencpop_lines)} 行到 to {opencpop_path}")
+
 def stars_to_gtsinger(json_path):
     """
     根据 STARS 的 output.json，生成 GTSinger 格式乐谱（json）。
@@ -230,12 +276,26 @@ def stars_to_gtsinger(json_path):
         score_dict = convert_item_to_gtsinger(item, ph2words_map)
         gtsinger_scores.append(score_dict)
 
-    # 4. 保存输出
+    # 4. 保存输出gtsinger形式乐谱
     gtsinger_path = json_path.replace("output.json", "gtsinger.json")
     write_json(gtsinger_scores, gtsinger_path)
     print(f"GTSinger 格式乐谱输出到: {gtsinger_path}")
 
-if __name__ == "__main__":
+    # 5. 处理成opencpop形式乐谱
+    gtsinger_to_opencpop(gtsinger_path)
+
+# 测试函数
+def test():
     json_path = "rock_new/output.json"
 
     stars_to_gtsinger(json_path)
+
+# 指令模式
+def command():
+    json_path = sys.argv[1]
+    stars_to_gtsinger(json_path)
+
+
+
+if __name__ == "__main__":
+    test()
